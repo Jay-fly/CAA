@@ -1,0 +1,18 @@
+[project]
+name = "caa-nfz-crawler"
+version = "0.1.0"
+description = "CAA No-Fly Zone data crawler"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28",
+]
+
+[project.scripts]
+caa-nfz = "caa_nfz.crawler:main"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+distribution = true
