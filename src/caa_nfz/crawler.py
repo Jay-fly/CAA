@@ -2,7 +2,6 @@ import logging
 import time
 
 import httpx
-
 from caa_nfz.config import BASE_URL, LAYERS, PAGE_SIZE
 
 log = logging.getLogger(__name__)
@@ -18,15 +17,18 @@ def fetch_layer(name: str, endpoint: str) -> list[dict]:
     with httpx.Client(verify=False, timeout=30) as client:
         while True:
             start = time.time()
-            resp = client.get(url, params={
-                "where": "1=1",
-                "outFields": "*",
-                "returnGeometry": "true",
-                "outSR": "4326",
-                "resultOffset": str(offset),
-                "resultRecordCount": str(PAGE_SIZE),
-                "f": "json",
-            })
+            resp = client.get(
+                url,
+                params={
+                    "where": "1=1",
+                    "outFields": "*",
+                    "returnGeometry": "true",
+                    "outSR": "4326",
+                    "resultOffset": str(offset),
+                    "resultRecordCount": str(PAGE_SIZE),
+                    "f": "json",
+                },
+            )
             resp.raise_for_status()
             data = resp.json()
             elapsed = time.time() - start

@@ -16,11 +16,13 @@ def to_geojson(layer_name: str, features: list[dict]) -> dict:
     geojson_features = []
     for f in features:
         geom = _arcgis_geometry_to_geojson(f.get("geometry", {}))
-        geojson_features.append({
-            "type": "Feature",
-            "properties": f.get("attributes", {}),
-            "geometry": geom,
-        })
+        geojson_features.append(
+            {
+                "type": "Feature",
+                "properties": f.get("attributes", {}),
+                "geometry": geom,
+            }
+        )
     return {
         "type": "FeatureCollection",
         "features": geojson_features,
