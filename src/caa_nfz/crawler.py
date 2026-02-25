@@ -2,6 +2,7 @@ import logging
 import time
 
 import httpx
+
 from caa_nfz.config import BASE_URL, LAYERS, PAGE_SIZE
 
 log = logging.getLogger(__name__)
