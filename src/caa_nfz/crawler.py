@@ -56,26 +56,3 @@ def fetch_all_layers() -> dict[str, list[dict]]:
     for name, cfg in LAYERS.items():
         result[name] = fetch_layer(name, cfg["endpoint"])
     return result
-
-
-def main():
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s %(message)s",
-        datefmt="%H:%M:%S",
-    )
-
-    log.info("開始抓取 CAA 無人機禁飛區資料")
-    all_data = fetch_all_layers()
-
-    # 摘要
-    print("\n===== 摘要 =====")
-    total = 0
-    for name, features in all_data.items():
-        print(f"  {name}: {len(features)} 筆")
-        total += len(features)
-    print(f"  合計: {total} 筆")
-
-
-if __name__ == "__main__":
-    main()
