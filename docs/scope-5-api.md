@@ -9,8 +9,8 @@
 ### `src/caa_nfz/routes.py`
 
 ```python
+from pydantic import BaseModel
 from fastapi import APIRouter, Query
-from geoalchemy2.functions import ST_AsGeoJSON, ST_GeomFromText
 from sqlalchemy import func, select
 
 from caa_nfz.database import async_session
@@ -20,13 +20,18 @@ from caa_nfz.services import refresh_zones
 router = APIRouter()
 
 
+class CheckPointRequest(BaseModel):
+    lng: float
+    lat: float
+
+
 @router.get("/zones")
 async def get_zones(layer: str | None = Query(None)):
     ...
 
 
 @router.post("/zones/check")
-async def check_point(lng: float, lat: float):
+async def check_point(body: CheckPointRequest):
     ...
 
 
@@ -66,9 +71,15 @@ async def trigger_refresh():
 ```
 
 **實作要點：**
-- 使用 `ST_AsGeoJSON(geometry)` 將 PostGIS geometry 轉為 GeoJSON
-- `properties` 欄位從 JSON string 解析回 dict
+- 使用 `func.ST_AsGeoJSON(NoFlyZone.geometry)` 將 PostGIS geometry 轉為 GeoJSON
+- `ST_AsGeoJSON()` 回傳的是 JSON **字串**，需 `json.loads()` 解析為 dict
+- `properties` 欄位從 JSON string 解析回 dict（同樣需 `json.loads()`）
 - 若提供 `layer` 參數，加上 `WHERE layer = :layer` 篩選
+
+**效能備註：**
+- 全部資料（5 圖層、~4,845 筆）原始 JSON 約 27 MB，GZip 壓縮後約 8 MB
+- 在 Scope 7 的 FastAPI app 加上 `GZipMiddleware`，瀏覽器自動解壓縮，前端無需額外處理
+- UAV 圖層佔最大比例（4,744 筆、~25 MB），其他圖層很小
 
 ---
 
@@ -101,7 +112,8 @@ async def trigger_refresh():
 ```
 
 **實作要點：**
-- 使用 `ST_Contains(geometry, ST_GeomFromText('POINT(lng lat)', 4326))` 進行空間查詢
+- 使用 Pydantic `BaseModel`（`CheckPointRequest`）接收 JSON body，不可用裸 `float` 參數（否則 FastAPI 會當成 query parameter）
+- 使用 `func.ST_Contains(NoFlyZone.geometry, func.ST_GeomFromText(f'POINT({lng} {lat})', 4326))` 進行空間查詢
 - 注意 WKT POINT 格式為 `POINT(lng lat)`（經度在前）
 - 回傳所有包含該點的禁限航區
 
@@ -125,6 +137,7 @@ async def trigger_refresh():
 **實作要點：**
 - 呼叫 `refresh_zones()` 執行全量替換
 - 回傳寫入筆數
+- 注意 `refresh_zones()` 內部呼叫的 `fetch_layer()` 是同步 HTTP 呼叫，會在 fetch 階段阻塞 event loop
 
 ## 驗證
 
