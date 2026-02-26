@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     db_password: str = "postgres"
     db_name: str = "caa_nfz"
 
+    # 排程
+    refresh_interval_minutes: int = 60
+
     @computed_field
     @property
     def database_url(self) -> str:
