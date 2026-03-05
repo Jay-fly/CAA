@@ -14,6 +14,9 @@ dependencies = [
     "apscheduler>=3.10,<4",
 ]
 
+[project.scripts]
+caa-nfz = "caa_nfz.app:app"
+
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
