@@ -6,8 +6,11 @@
 - POST /zones/refresh — 手動觸發資料同步（需 Bearer Token）
 """
 
+import asyncio
 import hmac
 import json
+import logging
+import threading
 
 from fastapi import APIRouter, Header, HTTPException, Query
 from pydantic import BaseModel
@@ -19,6 +22,8 @@ from caa_nfz.services import refresh_zones
 from caa_nfz.settings import settings
 
 router = APIRouter()
+log = logging.getLogger(__name__)
+_refresh_lock = threading.Lock()
 
 
 class CheckPointRequest(BaseModel):
@@ -71,6 +76,17 @@ async def check_point(body: CheckPointRequest):
     return {"in_zone": len(zone_ids) > 0, "zone_ids": zone_ids}
 
 
+def _run_refresh() -> None:
+    """在獨立 thread 中執行 refresh_zones()，完成後釋放 lock。"""
+    try:
+        count = asyncio.run(refresh_zones())
+        log.info("背景同步完成，共 %d 筆", count)
+    except Exception:
+        log.exception("背景同步失敗")
+    finally:
+        _refresh_lock.release()
+
+
 @router.post("/zones/refresh", include_in_schema=False)
 async def post_refresh_zones(
     authorization: str = Header(default=""),
@@ -79,5 +95,10 @@ async def post_refresh_zones(
     expected = f"Bearer {settings.admin_token}"
     if not settings.admin_token or not hmac.compare_digest(authorization, expected):
         raise HTTPException(status_code=401, detail="Unauthorized")
-    count = await refresh_zones()
-    return {"message": "同步完成", "count": count}
+
+    if not _refresh_lock.acquire(blocking=False):
+        raise HTTPException(status_code=409, detail="同步正在執行中")
+
+    loop = asyncio.get_running_loop()
+    loop.run_in_executor(None, _run_refresh)
+    return {"message": "同步已排入背景執行"}
