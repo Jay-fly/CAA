@@ -1,8 +1,10 @@
 from pydantic import computed_field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env")
+
     # 資料庫
     db_host: str = "localhost"
     db_port: int = 5432
