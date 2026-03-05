@@ -45,9 +45,12 @@ src/caa_nfz/
 | 4 | [scope-4-services.md](scope-4-services.md) | 資料同步服務 | Scope 3 |
 | 5 | [scope-5-api.md](scope-5-api.md) | API 路由 | Scope 4 |
 | 6 | [scope-6-scheduler.md](scope-6-scheduler.md) | 定時排程 | Scope 4 |
-| 7 | [scope-7-app-entry.md](scope-7-app-entry.md) | 應用程式入口 | Scope 5, 6 |
+| 7 | [scope-7-refresh-api.md](scope-7-refresh-api.md) | Refresh API 與設定補齊 | Scope 5 |
+| 8 | [scope-8-dev-environment.md](scope-8-dev-environment.md) | Docker 開發環境 | — |
+| 9 | [scope-9-app-entry.md](scope-9-app-entry.md) | 應用程式入口 | Scope 6, 7, 8 |
 
 ```
-Scope 1 → Scope 2 → Scope 3 → Scope 4 → Scope 5 ─┐
-                                         └→ Scope 6 ─┼→ Scope 7
+Scope 1 → 2 → 3 → 4 → 5 → 7 ─┐
+                    └→ 6 ───────┼→ 9
+                    Scope 8 ────┘
 ```

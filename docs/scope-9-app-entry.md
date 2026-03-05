@@ -1,4 +1,4 @@
-# Scope 7: 應用程式入口
+# Scope 9: 應用程式入口
 
 ## 目標
 
@@ -92,12 +92,13 @@ pdm run uvicorn caa_nfz.app:app --host 0.0.0.0 --port 8000
 
 ### 2. OpenAPI 文件
 
-瀏覽 `http://localhost:8000/docs`，確認三個 endpoints 列出。
+瀏覽 `http://localhost:8000/docs`，確認顯示 2 個 endpoints（`GET /zones` 和 `POST /zones/check`）。`POST /zones/refresh` 因 `include_in_schema=False` 不會出現。
 
 ### 3. 手動同步
 
 ```bash
-curl -X POST http://localhost:8000/api/zones/refresh
+curl -X POST http://localhost:8000/api/zones/refresh \
+  -H "Authorization: Bearer $REFRESH_TOKEN"
 ```
 
 確認回傳 `{"message": "同步完成", "count": N}`。
