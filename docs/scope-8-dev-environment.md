@@ -12,10 +12,11 @@
 services:
   db:
     image: postgis/postgis:17-3.5
+    platform: linux/amd64
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: caa_nfz
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-caa_nfz}
     ports:
       - "5432:5432"
     volumes:
@@ -45,7 +46,7 @@ REFRESH_INTERVAL_MINUTES=60
 
 # API
 API_PREFIX=/api
-REFRESH_TOKEN=my-secret-token
+ADMIN_TOKEN=my-secret-token
 ```
 
 ## 驗證步驟
