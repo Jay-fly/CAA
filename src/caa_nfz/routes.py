@@ -1,18 +1,22 @@
 """禁航區 API 路由。
 
-提供兩個 endpoint：
-- GET  /zones       — 查詢禁航區（可選 layer 篩選）
-- POST /zones/check — 座標點位是否落在禁航區內
+提供三個 endpoint：
+- GET  /zones         — 查詢禁航區（可選 layer 篩選）
+- POST /zones/check   — 座標點位是否落在禁航區內
+- POST /zones/refresh — 手動觸發資料同步（需 Bearer Token）
 """
 
+import hmac
 import json
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Header, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy import func, select
 
 from caa_nfz.database import async_session
 from caa_nfz.models import NoFlyZone
+from caa_nfz.services import refresh_zones
+from caa_nfz.settings import settings
 
 router = APIRouter()
 
@@ -65,3 +69,15 @@ async def check_point(body: CheckPointRequest):
 
     zone_ids = [row.id for row in rows]
     return {"in_zone": len(zone_ids) > 0, "zone_ids": zone_ids}
+
+
+@router.post("/zones/refresh", include_in_schema=False)
+async def post_refresh_zones(
+    authorization: str = Header(default=""),
+):
+    """手動觸發禁航區資料同步（需 Bearer Token）。"""
+    expected = f"Bearer {settings.admin_token}"
+    if not settings.admin_token or not hmac.compare_digest(authorization, expected):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    count = await refresh_zones()
+    return {"message": "同步完成", "count": count}

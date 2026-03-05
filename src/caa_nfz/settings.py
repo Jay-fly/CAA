@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     # 排程
     refresh_interval_minutes: int = 60
 
+    # API
+    api_prefix: str = "/api"
+    admin_token: str = ""
+
     @computed_field
     @property
     def database_url(self) -> str:
