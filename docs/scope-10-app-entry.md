@@ -1,4 +1,4 @@
-# Scope 9: 應用程式入口
+# Scope 10: 應用程式入口
 
 ## 目標
 
@@ -101,7 +101,7 @@ curl -X POST http://localhost:8000/api/zones/refresh \
   -H "Authorization: Bearer $REFRESH_TOKEN"
 ```
 
-確認回傳 `{"message": "同步完成", "count": N}`。
+確認回傳 `{"message": "同步已排入背景執行"}`。
 
 ### 4. 查詢資料
 
