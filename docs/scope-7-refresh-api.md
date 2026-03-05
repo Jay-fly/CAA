@@ -12,13 +12,13 @@
  class Settings(BaseSettings):
      ...
 +    api_prefix: str = "/api"
-+    refresh_token: str = ""
++    admin_token: str = ""
 ```
 
 | 欄位 | 環境變數 | 預設值 | 說明 |
 |------|----------|--------|------|
 | `api_prefix` | `API_PREFIX` | `"/api"` | 路由前綴 |
-| `refresh_token` | `REFRESH_TOKEN` | `""` | refresh endpoint 驗證用 token，空字串表示未設定 |
+| `admin_token` | `ADMIN_TOKEN` | `""` | refresh endpoint 驗證用 token，空字串表示未設定 |
 
 ### `src/caa_nfz/routes.py` — 新增 refresh endpoint
 
@@ -41,8 +41,8 @@ async def post_refresh_zones(
     authorization: str = Header(default=""),
 ):
     """手動觸發禁航區資料同步（需 Bearer Token）。"""
-    expected = f"Bearer {settings.refresh_token}"
-    if not settings.refresh_token or not hmac.compare_digest(authorization, expected):
+    expected = f"Bearer {settings.admin_token}"
+    if not settings.admin_token or not hmac.compare_digest(authorization, expected):
         raise HTTPException(status_code=401, detail="Unauthorized")
     count = await refresh_zones()
     return {"message": "同步完成", "count": count}
@@ -51,7 +51,7 @@ async def post_refresh_zones(
 重點：
 - `include_in_schema=False` — 從 OpenAPI 文件隱藏此 endpoint
 - Token 比對使用 `Bearer {token}` 格式
-- `refresh_token` 為空字串時一律回 401，避免未設定時被任意存取
+- `admin_token` 為空字串時一律回 401，避免未設定時被任意存取
 - 使用 `hmac.compare_digest()` 做 constant-time 比對，防止 timing attack 透過回應時間差推測 token 內容
 - 背景執行與 lock 保護見 Scope 9
 
@@ -60,7 +60,7 @@ async def post_refresh_zones(
 ### 1. 帶正確 token 呼叫
 
 ```bash
-export REFRESH_TOKEN="my-secret-token"
+export ADMIN_TOKEN="my-secret-token"
 # 啟動伺服器後...
 curl -X POST http://localhost:8000/api/zones/refresh \
   -H "Authorization: Bearer my-secret-token"

@@ -53,8 +53,8 @@ async def post_refresh_zones(
     authorization: str = Header(default=""),
 ):
     """手動觸發禁航區資料同步（需 Bearer Token）。"""
-    expected = f"Bearer {settings.refresh_token}"
-    if not settings.refresh_token or not hmac.compare_digest(authorization, expected):
+    expected = f"Bearer {settings.admin_token}"
+    if not settings.admin_token or not hmac.compare_digest(authorization, expected):
         raise HTTPException(status_code=401, detail="Unauthorized")
     if not _refresh_lock.acquire(blocking=False):
         raise HTTPException(status_code=409, detail="同步正在執行中")
@@ -77,7 +77,7 @@ async def post_refresh_zones(
 
 ```bash
 curl -X POST http://localhost:8000/api/zones/refresh \
-  -H "Authorization: Bearer $REFRESH_TOKEN"
+  -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 
 預期回傳：
@@ -90,7 +90,7 @@ curl -X POST http://localhost:8000/api/zones/refresh \
 
 ```bash
 curl -X POST http://localhost:8000/api/zones/refresh \
-  -H "Authorization: Bearer $REFRESH_TOKEN"
+  -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 
 預期回傳 HTTP 409：

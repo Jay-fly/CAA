@@ -98,7 +98,7 @@ pdm run uvicorn caa_nfz.app:app --host 0.0.0.0 --port 8000
 
 ```bash
 curl -X POST http://localhost:8000/api/zones/refresh \
-  -H "Authorization: Bearer $REFRESH_TOKEN"
+  -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 
 確認回傳 `{"message": "同步已排入背景執行"}`。
