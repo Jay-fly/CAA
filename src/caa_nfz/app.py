@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.gzip import GZipMiddleware
 
 from caa_nfz.database import init_db
 from caa_nfz.routes import router
@@ -31,4 +32,5 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.include_router(router, prefix=settings.api_prefix)
