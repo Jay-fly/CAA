@@ -1,20 +1,19 @@
-import asyncio
 import logging
 
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from caa_nfz.services import refresh_zones
 from caa_nfz.settings import settings
 
 log = logging.getLogger(__name__)
 
-scheduler = BackgroundScheduler()
+scheduler = AsyncIOScheduler()
 
 
-def _run_refresh():
-    """在背景 thread 中執行 async refresh_zones()。"""
+async def _run_refresh():
+    """排程 job：執行 refresh_zones()。"""
     try:
-        count = asyncio.run(refresh_zones())
+        count = await refresh_zones()
         log.info("排程同步完成: %d 筆", count)
     except Exception:
         log.exception("排程同步失敗")

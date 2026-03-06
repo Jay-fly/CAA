@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 
@@ -5,7 +6,7 @@ from sqlalchemy import delete
 
 from caa_nfz.config import LAYERS
 from caa_nfz.converter import _arcgis_geometry_to_geojson
-from caa_nfz.crawler import fetch_layer
+from caa_nfz.crawler import fetch_all_layers
 from caa_nfz.database import async_session
 from caa_nfz.models import NoFlyZone
 
@@ -16,14 +17,16 @@ BATCH_SIZE = 500
 
 async def refresh_zones() -> int:
     """爬取所有圖層，全量替換資料庫中的資料。回傳寫入筆數。"""
-    total = 0
+    loop = asyncio.get_running_loop()
+    all_layers = await loop.run_in_executor(None, fetch_all_layers)
 
+    total = 0
     async with async_session() as session, session.begin():
         await session.execute(delete(NoFlyZone))
 
         batch: list[NoFlyZone] = []
-        for layer_name, cfg in LAYERS.items():
-            features = fetch_layer(layer_name, cfg["endpoint"])
+        for layer_name, features in all_layers.items():
+            cfg = LAYERS[layer_name]
             name_field = cfg.get("name_field")
 
             for f in features:
