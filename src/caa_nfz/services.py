@@ -11,6 +11,7 @@ from caa_nfz.converter import _arcgis_geometry_to_geojson
 from caa_nfz.crawler import fetch_all_layers
 from caa_nfz.database import async_session
 from caa_nfz.models import NoFlyZone
+from caa_nfz.normalizer import normalize_properties
 
 log = logging.getLogger(__name__)
 
@@ -41,7 +42,10 @@ async def refresh_zones() -> int:
                     NoFlyZone(
                         layer=layer_name,
                         name=attrs.get(name_field) if name_field else None,
-                        properties=json.dumps(attrs, ensure_ascii=False),
+                        properties=json.dumps(
+                            normalize_properties(layer_name, attrs),
+                            ensure_ascii=False,
+                        ),
                         geometry=from_shape(shape(geojson_geom), srid=4326),
                     )
                 )
