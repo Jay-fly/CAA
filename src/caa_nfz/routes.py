@@ -8,10 +8,11 @@
 
 import asyncio
 import hmac
-import json
 import logging
 
+import orjson
 from fastapi import APIRouter, Header, HTTPException, Query
+from fastapi.responses import Response
 from pydantic import BaseModel
 from sqlalchemy import func, select
 
@@ -52,14 +53,15 @@ async def get_zones(layer: str | None = Query(None)):
             "id": row.id,
             "layer": row.layer,
             "name": row.name,
-            # ST_AsGeoJSON() 與 properties 欄位回傳的是 JSON 字串，需解析為 dict
-            "properties": json.loads(row.properties) if row.properties else None,
-            "geometry": json.loads(row.geometry),
+            "properties": orjson.Fragment(row.properties) if row.properties else None,
+            "geometry": orjson.Fragment(row.geometry),
             "created_at": row.created_at.isoformat(),
         }
         for row in rows
     ]
-    return {"count": len(zones), "zones": zones}
+    payload = orjson.dumps({"count": len(zones), "zones": zones})
+
+    return Response(content=payload, media_type="application/json")
 
 
 @router.post("/zones/check")
