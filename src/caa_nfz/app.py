@@ -32,5 +32,5 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.add_middleware(GZipMiddleware, minimum_size=1000)
+app.add_middleware(GZipMiddleware, minimum_size=1000, compresslevel=1)
 app.include_router(router, prefix=settings.api_prefix)

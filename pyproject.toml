@@ -13,6 +13,7 @@ dependencies = [
     "pydantic-settings>=2.7",
     "apscheduler>=3.10,<4",
     "shapely>=2.1.2",
+    "orjson>=3.11.7",
 ]
 
 [project.scripts]
