@@ -2,6 +2,8 @@ import asyncio
 import json
 import logging
 
+from geoalchemy2.shape import from_shape
+from shapely.geometry import shape
 from sqlalchemy import delete
 
 from caa_nfz.config import LAYERS
@@ -40,7 +42,7 @@ async def refresh_zones() -> int:
                         layer=layer_name,
                         name=attrs.get(name_field) if name_field else None,
                         properties=json.dumps(attrs, ensure_ascii=False),
-                        geometry=f"SRID=4326;{json.dumps(geojson_geom)}",
+                        geometry=from_shape(shape(geojson_geom), srid=4326),
                     )
                 )
 

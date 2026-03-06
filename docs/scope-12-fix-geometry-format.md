@@ -44,7 +44,7 @@ from shapely.geometry import shape
 geometry=from_shape(shape(geojson_geom), srid=4326),
 ```
 
-3. 移除不再需要的 `import json`（檢查是否仍有其他用途，若第 42 行 `json.dumps(attrs)` 仍在使用則保留）。
+3. 保留 `import json`（第 42 行 `json.dumps(attrs, ensure_ascii=False)` 仍在使用）。
 
 ## 驗證步驟
 
